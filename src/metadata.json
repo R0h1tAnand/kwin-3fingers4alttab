@@ -1,0 +1,17 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "MrSnowball-dev"
+            }
+        ],
+        "Category": "Window Management",
+        "Description": "Switch windows with a 3-finger touchpad swipe using the Alt+Tab interface. Swipe right to go to the next window, swipe left to go to the previous. Both activation and cycle distances are configurable.",
+        "EnabledByDefault": true,
+        "License": "GPL-2.0-or-later",
+        "Name": "3-Finger Swipe for Alt+Tab",
+        "Version": "1.0",
+        "Website": "https://github.com/MrSnowball-dev/kwin-3fingers4alttab"
+    },
+    "X-KDE-ConfigModule": "kwin_effect_3fingers4alttab_config"
+}

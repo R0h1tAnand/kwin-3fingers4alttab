@@ -1,0 +1,7 @@
+{
+    "KPlugin": {
+        "Id": "kwin_effect_3fingers4alttab_config",
+        "License": "GPL-2.0-or-later",
+        "Name": "3-Finger Swipe for Alt+Tab Configuration"
+    }
+}

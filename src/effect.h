@@ -5,14 +5,16 @@
 
 #include <effect/effect.h>
 #include <input.h>
-#include <input_event_spy.h>
 
 #include <QPointF>
 
 namespace KWin
 {
 
-class SwipeForAltTabEffect : public Effect, public InputEventSpy
+// InputEventFilter (not InputEventSpy) so we can consume the 3-finger swipe
+// and stop it from also reaching GlobalShortcutFilter, which owns KWin's
+// built-in 3/4-finger horizontal swipe -> desktop switch gesture.
+class SwipeForAltTabEffect : public Effect, public InputEventFilter
 {
     Q_OBJECT
 
@@ -20,10 +22,10 @@ public:
     SwipeForAltTabEffect();
     ~SwipeForAltTabEffect() override;
 
-    void swipeGestureBegin(PointerSwipeGestureBeginEvent *event) override;
-    void swipeGestureUpdate(PointerSwipeGestureUpdateEvent *event) override;
-    void swipeGestureEnd(PointerSwipeGestureEndEvent *event) override;
-    void swipeGestureCancelled(PointerSwipeGestureCancelEvent *event) override;
+    bool swipeGestureBegin(PointerSwipeGestureBeginEvent *event) override;
+    bool swipeGestureUpdate(PointerSwipeGestureUpdateEvent *event) override;
+    bool swipeGestureEnd(PointerSwipeGestureEndEvent *event) override;
+    bool swipeGestureCancelled(PointerSwipeGestureCancelEvent *event) override;
 
     void reconfigure(ReconfigureFlags flags) override;
 
@@ -37,6 +39,7 @@ private:
 
     enum class State { Idle, Tracking, Switching };
     State m_state = State::Idle;
+    bool m_owning = false;
 
     QPointF m_delta;
     double m_lastCycleX = 0;

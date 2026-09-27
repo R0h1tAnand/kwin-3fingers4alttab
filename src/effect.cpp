@@ -18,8 +18,9 @@ namespace KWin
 {
 
 SwipeForAltTabEffect::SwipeForAltTabEffect()
+    : InputEventFilter(InputFilterOrder::TabBox)
 {
-    input()->installInputEventSpy(this);
+    input()->installInputEventFilter(this);
     reconfigure(ReconfigureAll);
 }
 
@@ -37,19 +38,21 @@ SwipeForAltTabEffect::~SwipeForAltTabEffect()
         cancelSwitching();
 }
 
-void SwipeForAltTabEffect::swipeGestureBegin(PointerSwipeGestureBeginEvent *event)
+bool SwipeForAltTabEffect::swipeGestureBegin(PointerSwipeGestureBeginEvent *event)
 {
     if (event->fingerCount != 3 || m_state != State::Idle)
-        return;
+        return false;
     m_state = State::Tracking;
+    m_owning = true;
     m_delta = {};
     m_lastCycleX = 0;
+    return true;
 }
 
-void SwipeForAltTabEffect::swipeGestureUpdate(PointerSwipeGestureUpdateEvent *event)
+bool SwipeForAltTabEffect::swipeGestureUpdate(PointerSwipeGestureUpdateEvent *event)
 {
     if (m_state == State::Idle)
-        return;
+        return false;
 
     m_delta += event->delta;
 
@@ -71,22 +74,31 @@ void SwipeForAltTabEffect::swipeGestureUpdate(PointerSwipeGestureUpdateEvent *ev
             m_lastCycleX = m_delta.x();
         }
     }
+    return true;
 }
 
-void SwipeForAltTabEffect::swipeGestureEnd(PointerSwipeGestureEndEvent *event)
+bool SwipeForAltTabEffect::swipeGestureEnd(PointerSwipeGestureEndEvent *event)
 {
     Q_UNUSED(event)
+    if (!m_owning)
+        return false;
     if (m_state == State::Switching)
         acceptSwitching();
     m_state = State::Idle;
+    m_owning = false;
+    return true;
 }
 
-void SwipeForAltTabEffect::swipeGestureCancelled(PointerSwipeGestureCancelEvent *event)
+bool SwipeForAltTabEffect::swipeGestureCancelled(PointerSwipeGestureCancelEvent *event)
 {
     Q_UNUSED(event)
+    if (!m_owning)
+        return false;
     if (m_state == State::Switching)
         cancelSwitching();
     m_state = State::Idle;
+    m_owning = false;
+    return true;
 }
 
 // Inject Alt + [Shift +] Tab to open the task switcher and take one step.

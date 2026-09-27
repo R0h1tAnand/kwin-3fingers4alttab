@@ -51,7 +51,11 @@ bool SwipeForAltTabEffect::swipeGestureBegin(PointerSwipeGestureBeginEvent *even
 
 bool SwipeForAltTabEffect::swipeGestureUpdate(PointerSwipeGestureUpdateEvent *event)
 {
-    if (m_state == State::Idle)
+    // Once we've claimed a 3-finger gesture at Begin, keep consuming its
+    // events for its whole lifetime (even if we internally give up on
+    // recognizing it as a horizontal swipe) so it's never partially leaked
+    // to GlobalShortcutFilter downstream.
+    if (!m_owning)
         return false;
 
     m_delta += event->delta;

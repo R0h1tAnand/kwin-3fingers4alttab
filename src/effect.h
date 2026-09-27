@@ -47,6 +47,7 @@ private:
 
     double m_activationThreshold = 40.0;
     double m_cycleThreshold = 100.0;
+    bool m_preventWraparound = true;
 };
 
 } // namespace KWin

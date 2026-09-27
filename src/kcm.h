@@ -6,6 +6,7 @@
 #include <KCModule>
 
 class QSpinBox;
+class QCheckBox;
 
 class SwipeConfigModule : public KCModule
 {
@@ -21,4 +22,5 @@ public:
 private:
     QSpinBox *m_activationSpin = nullptr;
     QSpinBox *m_cycleSpin = nullptr;
+    QCheckBox *m_preventWraparoundCheck = nullptr;
 };

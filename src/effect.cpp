@@ -31,6 +31,7 @@ void SwipeForAltTabEffect::reconfigure(ReconfigureFlags)
     KConfigGroup cfg = config.group(QStringLiteral("General"));
     m_activationThreshold = cfg.readEntry("ActivationThreshold", 40.0);
     m_cycleThreshold      = cfg.readEntry("CycleThreshold",      100.0);
+    m_preventWraparound   = cfg.readEntry("PreventWraparound",   true);
 }
 
 SwipeForAltTabEffect::~SwipeForAltTabEffect()
@@ -128,7 +129,7 @@ void SwipeForAltTabEffect::startSwitching(bool forward)
 // since this clamp only applies to gesture-driven cycling).
 void SwipeForAltTabEffect::injectCycleKey(bool forward)
 {
-    const QList<EffectWindow *> windows = effects->currentTabBoxWindowList();
+    const QList<EffectWindow *> windows = m_preventWraparound ? effects->currentTabBoxWindowList() : QList<EffectWindow *>();
     EffectWindow *current = effects->currentTabBoxWindow();
     if (!windows.isEmpty() && current) {
         const int idx = windows.indexOf(current);

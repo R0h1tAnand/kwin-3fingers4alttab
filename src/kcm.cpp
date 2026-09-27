@@ -7,6 +7,7 @@
 #include <KPluginFactory>
 #include <KSharedConfig>
 
+#include <QCheckBox>
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QFormLayout>
@@ -33,8 +34,16 @@ SwipeConfigModule::SwipeConfigModule(QObject *parent, const KPluginMetaData &dat
     m_cycleSpin->setToolTip(QStringLiteral("How far to swipe to advance one window in the switcher"));
     layout->addRow(QStringLiteral("Cycle threshold:"), m_cycleSpin);
 
+    m_preventWraparoundCheck = new QCheckBox(
+        QStringLiteral("Stop at first/last window instead of wrapping around"), widget());
+    m_preventWraparoundCheck->setToolTip(QStringLiteral(
+        "When swiping past the last (or first) window, stay there instead of "
+        "cycling back around to the other end. Keyboard Alt+Tab still wraps normally."));
+    layout->addRow(QString(), m_preventWraparoundCheck);
+
     connect(m_activationSpin, &QSpinBox::valueChanged, this, [this] { setNeedsSave(true); });
     connect(m_cycleSpin,      &QSpinBox::valueChanged, this, [this] { setNeedsSave(true); });
+    connect(m_preventWraparoundCheck, &QCheckBox::toggled, this, [this] { setNeedsSave(true); });
 }
 
 void SwipeConfigModule::load()
@@ -43,6 +52,7 @@ void SwipeConfigModule::load()
                            ->group(QStringLiteral("General"));
     m_activationSpin->setValue(cfg.readEntry("ActivationThreshold", 40));
     m_cycleSpin->setValue(cfg.readEntry("CycleThreshold", 100));
+    m_preventWraparoundCheck->setChecked(cfg.readEntry("PreventWraparound", true));
     setNeedsSave(false);
 }
 
@@ -52,6 +62,7 @@ void SwipeConfigModule::save()
                            ->group(QStringLiteral("General"));
     cfg.writeEntry("ActivationThreshold", m_activationSpin->value());
     cfg.writeEntry("CycleThreshold", m_cycleSpin->value());
+    cfg.writeEntry("PreventWraparound", m_preventWraparoundCheck->isChecked());
     cfg.sync();
     setNeedsSave(false);
 
@@ -68,6 +79,7 @@ void SwipeConfigModule::defaults()
 {
     m_activationSpin->setValue(40);
     m_cycleSpin->setValue(100);
+    m_preventWraparoundCheck->setChecked(true);
 }
 
 #include "kcm.moc"

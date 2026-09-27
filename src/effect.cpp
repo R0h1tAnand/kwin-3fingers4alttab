@@ -3,6 +3,7 @@
 
 #include "effect.h"
 
+#include <effect/effecthandler.h>
 #include <input.h>
 #include <input_event.h>
 #include <keyboard_input.h>
@@ -122,8 +123,23 @@ void SwipeForAltTabEffect::startSwitching(bool forward)
 }
 
 // While the switcher is open (Alt held), inject [Shift +] Tab to cycle one step.
+// Stops at the last/first window instead of wrapping around when the swipe
+// keeps going past the end of the list (keyboard Alt+Tab still wraps normally
+// since this clamp only applies to gesture-driven cycling).
 void SwipeForAltTabEffect::injectCycleKey(bool forward)
 {
+    const QList<EffectWindow *> windows = effects->currentTabBoxWindowList();
+    EffectWindow *current = effects->currentTabBoxWindow();
+    if (!windows.isEmpty() && current) {
+        const int idx = windows.indexOf(current);
+        if (idx >= 0) {
+            if (forward && idx == windows.size() - 1)
+                return;
+            if (!forward && idx == 0)
+                return;
+        }
+    }
+
     QTimer::singleShot(0, this, [this, forward]() {
         if (!forward)
             injectKeyDown(KEY_LEFTSHIFT);
